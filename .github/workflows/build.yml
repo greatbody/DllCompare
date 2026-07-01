@@ -36,7 +36,7 @@ jobs:
         run: dotnet restore "DllCompare.sln" -p:Platform=${{ matrix.platform }}
 
       - name: Build
-        run: dotnet build "DllCompare.sln" --configuration Release --no-restore -p:Platform=${{ matrix.platform }}
+        run: dotnet build "DllCompare.sln" --configuration Release --no-restore -p:Platform=${{ matrix.platform }} -p:PublishReadyToRun=false
 
       - name: Publish
         run: >
@@ -46,6 +46,7 @@ jobs:
           -p:Platform=${{ matrix.platform }}
           -r ${{ matrix.runtime }}
           --self-contained true
+          -p:PublishReadyToRun=false
           -p:PublishDir="${{ github.workspace }}\artifacts\publish\${{ matrix.runtime }}\"
 
       - name: Package zip
