@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "DllCompare (Package)": {
+      "commandName": "MsixPackage"
+    },
+    "DllCompare (Unpackaged)": {
+      "commandName": "Project"
+    }
+  }
+}
