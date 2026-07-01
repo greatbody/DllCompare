@@ -14,6 +14,9 @@ x86/
 x64/
 ARM64/
 
+## Local sample assemblies
+DllCompare/Samples/
+
 ## .NET
 *.nupkg
 *.snupkg
