@@ -58,7 +58,7 @@ jobs:
           Compress-Archive -Path "$publishDir\*" -DestinationPath "$packageDir\DllCompare-${{ matrix.runtime }}.zip" -Force
 
       - name: Upload package
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v7
         with:
           name: DllCompare-${{ matrix.runtime }}
           path: artifacts/packages/DllCompare-${{ matrix.runtime }}.zip
