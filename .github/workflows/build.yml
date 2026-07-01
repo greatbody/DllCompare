@@ -1,0 +1,64 @@
+name: Build
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  build-and-package:
+    name: Build and package ${{ matrix.platform }}
+    runs-on: windows-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: x64
+            runtime: win-x64
+          - platform: x86
+            runtime: win-x86
+          - platform: ARM64
+            runtime: win-arm64
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Restore
+        run: dotnet restore "DllCompare.sln" -p:Platform=${{ matrix.platform }}
+
+      - name: Build
+        run: dotnet build "DllCompare.sln" --configuration Release --no-restore -p:Platform=${{ matrix.platform }}
+
+      - name: Publish
+        run: >
+          dotnet publish "DllCompare\DllCompare.csproj"
+          --configuration Release
+          --no-restore
+          -p:Platform=${{ matrix.platform }}
+          -r ${{ matrix.runtime }}
+          --self-contained true
+          -p:PublishDir="${{ github.workspace }}\artifacts\publish\${{ matrix.runtime }}\"
+
+      - name: Package zip
+        shell: pwsh
+        run: |
+          $publishDir = "${{ github.workspace }}\artifacts\publish\${{ matrix.runtime }}"
+          $packageDir = "${{ github.workspace }}\artifacts\packages"
+          New-Item -ItemType Directory -Force -Path $packageDir | Out-Null
+          Compress-Archive -Path "$publishDir\*" -DestinationPath "$packageDir\DllCompare-${{ matrix.runtime }}.zip" -Force
+
+      - name: Upload package
+        uses: actions/upload-artifact@v4
+        with:
+          name: DllCompare-${{ matrix.runtime }}
+          path: artifacts/packages/DllCompare-${{ matrix.runtime }}.zip
+          if-no-files-found: error
