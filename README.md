@@ -2,6 +2,8 @@
 
 DllCompare is a Windows desktop tool for comparing the metadata shape of .NET DLL files.
 
+Built with GPT-5.5.
+
 It is designed for cases where two rebuilt assemblies are binary-different, but should expose the same code structure. Instead of comparing raw bytes, DllCompare reads .NET metadata and compares namespaces, types, methods, and method signatures.
 
 ## Features
