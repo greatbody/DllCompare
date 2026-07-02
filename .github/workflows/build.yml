@@ -32,6 +32,10 @@ jobs:
         with:
           dotnet-version: 8.0.x
 
+      - name: Install Inno Setup
+        shell: pwsh
+        run: choco install innosetup --no-progress --yes
+
       - name: Restore
         run: dotnet restore "DllCompare.sln" -p:Platform=${{ matrix.platform }}
 
@@ -57,9 +61,27 @@ jobs:
           New-Item -ItemType Directory -Force -Path $packageDir | Out-Null
           Compress-Archive -Path "$publishDir\*" -DestinationPath "$packageDir\DllCompare-${{ matrix.runtime }}.zip" -Force
 
-      - name: Upload package
+      - name: Build installer
+        shell: pwsh
+        env:
+          APP_VERSION: 0.1.${{ github.run_number }}
+          PUBLISH_DIR: ${{ github.workspace }}\artifacts\publish\${{ matrix.runtime }}
+          INSTALLER_OUTPUT_DIR: ${{ github.workspace }}\artifacts\installers
+          RUNTIME_IDENTIFIER: ${{ matrix.runtime }}
+        run: |
+          New-Item -ItemType Directory -Force -Path $env:INSTALLER_OUTPUT_DIR | Out-Null
+          & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" "${{ github.workspace }}\installer\DllCompare.iss"
+
+      - name: Upload zip package
         uses: actions/upload-artifact@v7
         with:
-          name: DllCompare-${{ matrix.runtime }}
+          name: DllCompare-${{ matrix.runtime }}-zip
           path: artifacts/packages/DllCompare-${{ matrix.runtime }}.zip
+          if-no-files-found: error
+
+      - name: Upload installer
+        uses: actions/upload-artifact@v7
+        with:
+          name: DllCompare-${{ matrix.runtime }}-installer
+          path: artifacts/installers/DllCompare-Setup-${{ matrix.runtime }}.exe
           if-no-files-found: error
